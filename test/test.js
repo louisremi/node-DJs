@@ -1,24 +1,28 @@
 var sys = require('sys'),
   assert = require('assert'),
-  dev = require('../d');
+  djs = require('../d');
   
-dev.dependencies('file0.js', function(err, files) {
-  sys.log(JSON.stringify(files));
-  assert.deepEqual(files, ['file0.js'], "Watching only 'file0.js'");
+djs.playlist('file.js', function(err, files) {
+  assert.deepEqual(files, [], "No files in the playlist");
 });
 
-dev.dependencies('file1.js', function(err, files) {
-  sys.log(JSON.stringify(files));
-  assert.equal(files, ['file1.js', 'empty0.js'], "Watching 'file1.js' and one dependency");
+djs.playlist('file0.js', function(err, files) {
+  assert.deepEqual(files, ['file0.js'], "Only 'file0.js' in the playlist");
 });
 
-/*dev.dependencies('file2.js', function(err, files) {
-  sys.log(JSON.stringify(files));
-  assert.equal(files, ['file2.js', 'empty0.js', 'empty1.js'], "Watching 'file2.js' and two dependencies");
-});*/
+djs.playlist('file1.js', function(err, files) {
+  assert.deepEqual(toHash(files), toHash(['file1.js', 'empty0.js']), "'file1.js' and one dependency (same folder) in the playlist");
+});
 
-/*setInterval(function() {
-  sys.log(1);
-}, 1000);*/
+djs.playlist('file2.js', function(err, files) {
+  assert.deepEqual(toHash(files), toHash(['file2.js', 'empty0.js', 'empty1.js']), "'file2.js' and two dependencies (same folder) in the playlist");
+});
 
-//sys.log(JSON.stringify(Object.keys({})))
+// Since we are not sure about the playlist's order (shuffle mode, FTW), turn everything into a hash
+function toHash(array) {
+  var hash = {};
+  array.forEach(function(value) {
+    hash[value] = true;
+  });
+  return hash;
+}

@@ -1,2 +1,2 @@
-var a = require('./empty1'),
-  b = require('./empty2');
+var a = require('./empty0'),
+  b = require('./empty1');
