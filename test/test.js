@@ -34,6 +34,22 @@ djs.playlist('file6.js', function(err, files) {
   assert.deepEqual(toHash(files), toHash(['file6.js', 'deep5.js', 'empty0.js', 'empty1.js']), "Dependency redundency accross two levels");
 });
 
+djs.playlist('file7.js', function(err, files) {
+  assert.deepEqual(toHash(files), toHash(['file7.js', 'folder0/empty0.js']), "Dependency in a subfolder");
+});
+
+djs.playlist('file8.js', function(err, files) {
+  assert.deepEqual(toHash(files), toHash(['file8.js', 'folder0/empty0.js', 'folder0/empty1.js', 'folder1/empty0.js', 'folder1/empty1.js']), "Deps in two different subfolders");
+});
+
+djs.playlist('file9.js', function(err, files) {
+  assert.deepEqual(toHash(files), toHash(['file9.js', 'folder0/deep0.js', 'folder0/empty0.js', 'folder0/empty1.js']), "Two level deps in a subfolder");
+});
+
+djs.playlist('file10.js', function(err, files) {
+  assert.deepEqual(toHash(files), toHash(['file10.js', 'folder0/deep1.js', 'empty0.js', 'empty1.js']), "One first level dep in a subfolder and two second level deps in the same folder");
+});
+
 // Since we are not sure about the playlist's order (shuffle mode, FTW), turn everything into a hash
 function toHash(array) {
   var hash = {};
