@@ -2,39 +2,29 @@ var sys = require('sys'),
   fs = require('fs'),
   spawn = require('child_process').spawn,
   path = require('path'),
-  app = process.argv[2];
+  args = parse(process.argv),
+  intro = args.intro,
+  dir = args.dir,
+  test = args.test;
   
-// Add potentially missing extension
-app = app? app + (app.match(/\.js$/)? '' : '.js') : 'app.js';
-
-playlist(app, function(err, list) {
+playlist(intro, function(err, list) {
   if(err) throw err;
   if(!list.length) throw new Error("No files in the playlist.");
-  say('"Let\'s party!"');
-  var playing = play(app);
-  
-  /*playing.addListener('exit', function(code, signal) {
-    playing = false;
-  });*/
-  
-  // Kill the app when exiting DJs
-  process.addListener('exit', function(code, signal) {
-    say('"Party\'s over!"');
-    stop(playing, app);
-  });
+  say('"Party time!"');
+  var playing = play(intro);
   
   // Watch changes on any files of the playlist
   list.forEach(function(file) {
     fs.watchFile(file, function(curr, prev) {
       say("playlist updated");
-      stop(playing, app);
-      playing = play(app);
+      stop(playing, intro);
+      playing = play(intro);
     });
   });
   
-  function play(app) {
-    say("start playing "+app);
-    var playing = spawn('node', [app]);
+  function play(intro) {
+    //say("start playing "+intro);
+    var playing = spawn('node', [intro]);
     playing.stdout.addListener('data', function(data) {
       sys.print(data);
     });
@@ -43,25 +33,13 @@ playlist(app, function(err, list) {
     });
     return playing;
   }
-  function stop(playing, app) {
+  function stop(playing, intro) {
     if(playing) {
       playing.kill();
-      say("stop playing "+app);
+      //say("stop playing "+intro);
     }
   }
 });
-
-// Recursively find dependencies
-/*dependencies(app, function(err, watchList) {
-  if(err) throw err;
-  if(!watchList.length) return sys.log("No files to watch.");
-  watchList.forEach(function(file) {
-    fs.watchFile(file, function(curr, prev) {
-      sys.puts("the current mtime is: " + curr.mtime);
-      sys.puts("the previous mtime was: " + prev.mtime);
-    });
-  });
-});*/
 
 function playlist(file, callback) {
   var directory = path.dirname(file);
@@ -69,7 +47,7 @@ function playlist(file, callback) {
   if(file && !file.match(/\.js$/)) { file+= '.js'; }
   fs.readFile(file, function(err, data) {
     if(err) {
-      if(file) say('"Can\'t get my hands on '+ app +'"');
+      if(file) say('"Can\'t get my hands on '+ intro +'"');
       return callback.apply(global, [null, []]);
     }
     
@@ -104,8 +82,34 @@ function playlist(file, callback) {
   });
 }
 
+function parse(argv) {
+  var intro, dir, test;
+  intro = argv[2];
+  // Add potentially missing extension
+  intro = intro? intro + (intro.match(/\.js$/)? '' : '.js') : 'intro.js';
+  
+  if(argv.indexOf('-d') != -1) {
+    dir = argv[argv.indexOf('-d') +1];
+  } else if(argv.indexOf('--dir') != -1) {
+    dir = argv[argv.indexOf('--dir') +1];
+  }
+  
+  if(argv.indexOf('-t') != -1) {
+    test = argv[argv.indexOf('-t') +1] || true;
+  } else if(argv.indexOf('--test') != -1) {
+    test = argv[argv.indexOf('--test') +1] || true;
+  }
+  
+  return {
+    intro: intro,
+    dir: dir,
+    test: test
+  }
+}
+
 global.say = function(message) {
   sys.puts('DJs: '+message);
 }
 
 exports.playlist = playlist;
+exports.parse = parse;
