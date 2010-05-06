@@ -19,7 +19,7 @@ DJs recursively parses your scripts to find require()d files, looking for lines 
 
     var CSV = require(./csv);
     
-It adds them to its *playlist* and watch all of this files for changes, using the fs.watchFile function.
+It adds them to its *playlist* and watch all of these files for changes, using the fs.watchFile function.
 It is currently unable to watch dynamically loaded dependencies:
 
    var dep = './csv';
@@ -31,8 +31,9 @@ Continuous-Testing
 ------------------
 
 DJs will soon be able to run tests in the background while restarting your scripts.
+DJs could effectively be an equivalent to _watchr_ for nodejs.
 
 Package manager compatibility
 -----------------------------
 
-DJs intend to be compatible with main node package managers, one way or another.
+DJs intend to be compatible with the mains node packages managers, one way or another.
