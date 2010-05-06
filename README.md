@@ -7,7 +7,7 @@ Tired of restarting a script everytime you modify it or its dependencies? Drop a
     DJs: "Party time!"
     6 May 11:27:48 - Server listening on port 8000
 
-Now modify myNodeServer.js or _any of the require()ed files_ and hit Ctrl-S.
+Now modify myNodeServer.js or /any of the require()ed files/ and hit Ctrl-S.
 
     DJs: playlist updated
     6 May 11:29:22 - Server listening on port 8000
@@ -20,4 +20,4 @@ DJs will soon be able to run tests in the background while restarting your scrip
 Package manager compatibility
 -----------------------------
 
-DJs intend to be compatible with main node package manager, one way or another.
+DJs intend to be compatible with main node package managers, one way or another.
