@@ -1,13 +1,13 @@
 node-DJs
 ========
 
-Tired of restarting a script everytime you modify it or its dependencies? Drop a DJ in da place!
+Tired of restarting a script every time you modify it or its dependencies? Drop a DJ in da place!
 
     > node d.js myNodeServer.js
     DJs: "Party time!"
     6 May 11:27:48 - Server listening on port 8000
 
-Now modify myNodeServer.js or /any of the require()ed files/ and hit Ctrl-S.
+Now modify myNodeServer.js or __any of the require()ed files__ and hit Ctrl-S.
 
     DJs: playlist updated
     6 May 11:29:22 - Server listening on port 8000
