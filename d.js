@@ -86,7 +86,7 @@ function parse(argv) {
   var intro, dir, test;
   intro = argv[2];
   // Add potentially missing extension
-  intro = intro? intro + (intro.match(/\.js$/)? '' : '.js') : 'intro.js';
+  intro = intro? intro + (intro.match(/\.js$/)? '' : '.js') : 'app.js';
   
   if(argv.indexOf('-d') != -1) {
     dir = argv[argv.indexOf('-d') +1];
