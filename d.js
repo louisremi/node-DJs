@@ -2,10 +2,12 @@ var sys = require('sys'),
   fs = require('fs'),
   spawn = require('child_process').spawn,
   path = require('path'),
+  stdin = process.openStdin(),
   args = parse(process.argv),
   intro = args.intro,
   dir = args.dir,
   test = args.test;
+
   
 playlist(intro, function(err, list) {
   if(err) throw err;
@@ -20,6 +22,18 @@ playlist(intro, function(err, list) {
       stop(playing, intro);
       playing = play(intro);
     });
+  });
+  
+  // Listen for commands
+  stdin.setEncoding('utf8');
+  stdin.addListener('data', function (chunk) {
+    switch(chunk.toString()) {
+      case 'reset\n':
+        say("restarting playlist");
+        stop(playing, intro);
+        playing = play(intro);
+        break;
+    }
   });
   
   function play(intro) {
@@ -50,14 +64,14 @@ function playlist(file, callback) {
       if(file) say('"Can\'t get my hands on '+ intro +'"');
       return callback.apply(global, [null, []]);
     }
-    
+
     // We are using hashs to collect lists of _unique_ files
     var list = {}, deps = {},
       depsNb, i, read = 0;
-    
+
     // Add the current file
     list[file] = true;
-    
+
     // Search dependencies of that file
     while(match = /(?:^|[^\w-])require *\(\s*['"](\.\/|\.\.|\/)(.*?)['"]\s*\)/g.exec(data)) {
       deps[path.join(match[1] == '/'? '' : directory , (match[1] != "./"? match[1] : '') + match[2] + '.js')] = true;
