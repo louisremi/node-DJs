@@ -12,7 +12,7 @@ var sys = require('sys'),
 playlist(intro, function(err, list) {
   if(err) throw err;
   if(!list.length) throw new Error("No files in the playlist.");
-  say('"Party time!"');
+  say('"Party time! Press [enter] anytime to restart"');
   var playing = play(intro);
   
   // Watch changes on any files of the playlist
@@ -27,8 +27,8 @@ playlist(intro, function(err, list) {
   // Listen for commands
   stdin.setEncoding('utf8');
   stdin.addListener('data', function (chunk) {
-    switch(chunk.toString()) {
-      case 'reset\n':
+    switch(chunk) {
+      case '\n':
         say("restarting playlist");
         stop(playing, intro);
         playing = play(intro);
@@ -37,7 +37,6 @@ playlist(intro, function(err, list) {
   });
   
   function play(intro) {
-    //say("start playing "+intro);
     var playing = spawn('node', [intro]);
     playing.stdout.addListener('data', function(data) {
       sys.print(data);
@@ -50,7 +49,6 @@ playlist(intro, function(err, list) {
   function stop(playing, intro) {
     if(playing) {
       playing.kill();
-      //say("stop playing "+intro);
     }
   }
 });
@@ -113,7 +111,7 @@ function parse(argv) {
   } else if(argv.indexOf('--test') != -1) {
     test = argv[argv.indexOf('--test') +1] || true;
   }
-  
+
   return {
     intro: intro,
     dir: dir,
@@ -126,4 +124,5 @@ global.say = function(message) {
 }
 
 exports.playlist = playlist;
+
 exports.parse = parse;
