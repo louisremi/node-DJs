@@ -50,6 +50,8 @@ djs.playlist('file10.js', function(err, files) {
   assert.deepEqual(toHash(files), toHash(['file10.js', 'folder0/deep1.js', 'empty0.js', 'empty1.js']), "One first level dep in a subfolder and two second level deps in the same folder");
 });
 
+sys.log('All tests started');
+
 // Since we are not sure about the playlist's order (shuffle mode, FTW), turn everything into a hash
 function toHash(array) {
   var hash = {};
