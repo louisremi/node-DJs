@@ -29,7 +29,7 @@ if(test) {
 playlist(intro, function(err, list) {
   if(err) throw err;
   if(!list.length) throw new Error("No files in the playlist.");
-  say('"Party time! Press [enter] anytime to restart"');
+  say('"Party time!" Press [enter] anytime to restart');
   var playing = play(intro);
   
   // Watch changes on any files of the playlist
