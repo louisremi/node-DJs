@@ -34,10 +34,12 @@ playlist(intro, function(err, list) {
   
   // Watch changes on any files of the playlist
   list.forEach(function(file) {
-    fs.watchFile(file, function(curr, prev) {
-      say("playlist updated");
-      stop(playing, intro);
-      playing = play(intro);
+      fs.watchFile(file, {interval : 500}, function(curr, prev) {
+      if (curr.mtime.valueOf() != prev.mtime.valueOf() || curr.ctime.valueOf() != prev.ctime.valueOf()) {
+        say("playlist updated: " + file);
+        stop(playing, intro);
+        playing = play(intro);
+      }
     });
   });
   
