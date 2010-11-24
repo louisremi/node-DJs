@@ -135,13 +135,9 @@ function parse(argv) {
   if(dIndex == -1) { dIndex = argv.indexOf('--dir'); }
   if(dIndex != -1) { dir = argv[dIndex +1]; }
 
-  dIndex = argv.indexOf('-D');
-  if(dIndex == -1) { dIndex = argv.indexOf('--dirs'); }
-  if(dIndex != -1) { dirs = argv[dIndex +1]; }
-
-  if (dirs) {
+  if (dir.indexOf(':') > -1) {
       dirs = dirs.split(':');
-  } else {
+  } else if (dir) {
       dirs = [dir];
   }
   
