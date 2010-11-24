@@ -116,11 +116,9 @@ function playlist(file, callback) {
       var root = process.cwd();
       dirs.forEach(function(dir) {
         var dirPath = root + '/' + dir;
-        walkTree(dirPath, function(path, stat) {
-          var pathParts = path.split('.');
-          var ext = pathParts[pathParts.length - 1];
-          if (stat.isFile() && ext === 'js') {
-            list[path] = true;
+        walkTree(dirPath, function(filePath, stat) {
+          if (stat.isFile() && path.extname(filePath) === 'js') {
+            list[filePath] = true;
           }
         });
       });
