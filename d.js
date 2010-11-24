@@ -8,6 +8,7 @@ var sys = require('sys'),
   args = parse(process.argv),
   intro = args.intro,
   dir = args.dir,
+  dirs = args.dirs,
   test = args.test;
   
 // Run the tests in parallel
@@ -111,7 +112,27 @@ function playlist(file, callback) {
         }
       });
     } while(i > 0);
+
+    if (dir || dirs) {
+      if (dir) {
+        dirs = [dir];
+      } else if (dirs) {
+        dirs = dirs.split(':');
+      }
+      var root = process.cwd();
+      dirs.forEach(function(dir) {
+        var dirPath = root + '/' + dir;
+        walkTree(dirPath, function(path, stat) {
+          var pathParts = path.split('.');
+          var ext = pathParts[pathParts.length - 1];
+          if (stat.isFile() && ext === 'js') {
+            list[path] = true;
+          }
+        });
+      });
+    }
   });
+
 }
 
 function parse(argv) {
@@ -120,6 +141,10 @@ function parse(argv) {
   dIndex = argv.indexOf('-d');
   if(dIndex == -1) { dIndex = argv.indexOf('--dir'); }
   if(dIndex != -1) { dir = argv[dIndex +1]; }
+
+  dIndex = argv.indexOf('-D');
+  if(dIndex == -1) { dIndex = argv.indexOf('--dirs'); }
+  if(dIndex != -1) { dirs = argv[dIndex +1]; }
   
   tIndex = argv.indexOf('-t');
   if(tIndex == -1) { tIndex = argv.indexOf('--test'); }
@@ -133,9 +158,25 @@ function parse(argv) {
   return {
     intro: intro,
     dir: dir,
+    dirs: dirs,
     test: test
   }
 }
+
+var walkTree = function(rootPath, fn) {
+  var filenameParts, extension, path, stat;
+  var files = fs.readdirSync(rootPath);
+  files.forEach(function(file) {
+    filenameParts = file.split('.');
+    extension = filenameParts[filenameParts.length - 1];
+    path = rootPath + '/' + file;
+    stat = fs.lstatSync(path);
+    fn(path, stat);
+    if (stat.isDirectory() && !stat.isSymbolicLink()) {
+      walkTree(path, fn);
+    }
+  });
+};
 
 function startTest(test) {
   if(test) {
