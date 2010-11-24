@@ -117,11 +117,12 @@ function playlist(file, callback) {
       dirs.forEach(function(dir) {
         var dirPath = root + '/' + dir;
         walkTree(dirPath, function(filePath, stat) {
-          if (stat.isFile() && path.extname(filePath) === 'js') {
-            list[filePath] = true;
+          if (stat.isFile() && path.extname(filePath) === '.js') {
+            list[path.normalize(filePath)] = true;
           }
         });
       });
+      console.log(list);
     }
   });
 
