@@ -8,21 +8,21 @@ var sys = require('sys'),
   args = parse(process.argv),
   intro = args.intro,
   dirs = args.dirs,
-  test = args.test;
-  
+  tests = args.tests;
+
 // Run the tests in parallel
-if(test) {
-  if(test === true) {
+if(tests) {
+  if(tests === true) {
     fs.stat('test', function(err, stats) {
       if(err || !stats.isDirectory()) {
-        test = 'test.js';
+        tests = ['test.js'];
       } else {
-        test = 'test/test.js';
+        tests = ['test/test.js'];
       }
-      startTest(test);
+      startTest(tests);
     });
   } else {
-    startTest(test);
+    startTest(tests);
   }
 }
   
@@ -50,7 +50,7 @@ playlist(intro, function(err, list) {
       case '\n':
         say("restarting playlist");
         stop(playing, intro);
-        startTest(test);
+        startTest(tests);
         playing = play(intro);
         break;
     }
@@ -128,7 +128,7 @@ function playlist(file, callback) {
 }
 
 function parse(argv) {
-  var intro, dIndex, dir, tIndex, test;
+  var intro, dIndex, dir, tIndex, tests;
   
   dIndex = argv.indexOf('-d');
   if(dIndex == -1) { dIndex = argv.indexOf('--dir'); }
@@ -142,8 +142,16 @@ function parse(argv) {
 
   tIndex = argv.indexOf('-t');
   if(tIndex == -1) { tIndex = argv.indexOf('--test'); }
-  if(tIndex != -1) { test = tIndex +1 == dIndex? true : argv[tIndex +1] || true; }
+  if(tIndex != -1) { tests = tIndex +1 == dIndex? true : argv[tIndex +1] || true; }
   
+  if (tests !== true) {
+      if (tests && tests.indexOf(':') > -1) {
+          tests = tests.split(':');
+      } else if (tests) {
+          tests = [tests];
+      }
+  }
+
   intro = (dIndex == 2 || tIndex == 2)? false : argv[2]; 
   
   // Add potentially missing extension
@@ -152,7 +160,7 @@ function parse(argv) {
   return {
     intro: intro,
     dirs: dirs,
-    test: test
+    tests: tests
   }
 }
 
@@ -171,28 +179,30 @@ var walkTree = function(rootPath, fn) {
   });
 };
 
-function startTest(test) {
-  if(test) {
-    fs.stat(test, function(err, stats) {
-      if(err || !stats.isFile()) {
-        say("Test file not found");
-      } else {
-        // We'll buffer the output, to minimize noise
-        exec("node "+test, function(err, stdout, stderr) {
-          sys.puts("=============== Tests ===============");
-            _print("------------ Exec Errors ------------", err);
-            _print("--------------- stdout --------------", stdout);
-            _print("--------------- stderr --------------", stderr);
-          sys.puts("============= Tests End =============");
-          
-          function _print(header, data) {
-            if(data) {
-              sys.puts(header);
-              sys.print(typeof data == 'string'? data : data.toString('utf8', 0, data.length));
+function startTest(tests) {
+  if(tests) {
+    tests.forEach(function(test) {
+      fs.stat(test, function(err, stats) {
+        if(err || !stats.isFile()) {
+          say("Test file not found");
+        } else {
+          // We'll buffer the output, to minimize noise
+          exec("node "+test, function(err, stdout, stderr) {
+            sys.puts("=============== Tests ===============");
+              _print("------------ Exec Errors ------------", err);
+              _print("--------------- stdout --------------", stdout);
+              _print("--------------- stderr --------------", stderr);
+            sys.puts("============= Tests End =============");
+            
+            function _print(header, data) {
+              if(data) {
+                sys.puts(header);
+                sys.print(typeof data == 'string'? data : data.toString('utf8', 0, data.length));
+              }
             }
-          }
-        });
-      }
+          });
+        }
+      });
     });
   }
 }
