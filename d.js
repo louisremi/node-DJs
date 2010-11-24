@@ -122,7 +122,6 @@ function playlist(file, callback) {
           }
         });
       });
-      console.log(list);
     }
   });
 
@@ -135,12 +134,12 @@ function parse(argv) {
   if(dIndex == -1) { dIndex = argv.indexOf('--dir'); }
   if(dIndex != -1) { dir = argv[dIndex +1]; }
 
-  if (dir.indexOf(':') > -1) {
-      dirs = dirs.split(':');
+  if (dir && dir.indexOf(':') > -1) {
+      dirs = dir.split(':');
   } else if (dir) {
       dirs = [dir];
   }
-  
+
   tIndex = argv.indexOf('-t');
   if(tIndex == -1) { tIndex = argv.indexOf('--test'); }
   if(tIndex != -1) { test = tIndex +1 == dIndex? true : argv[tIndex +1] || true; }
