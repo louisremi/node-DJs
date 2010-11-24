@@ -7,7 +7,6 @@ var sys = require('sys'),
   stdin = process.openStdin(),
   args = parse(process.argv),
   intro = args.intro,
-  dir = args.dir,
   dirs = args.dirs,
   test = args.test;
   
@@ -113,12 +112,7 @@ function playlist(file, callback) {
       });
     } while(i > 0);
 
-    if (dir || dirs) {
-      if (dir) {
-        dirs = [dir];
-      } else if (dirs) {
-        dirs = dirs.split(':');
-      }
+    if (dirs) {
       var root = process.cwd();
       dirs.forEach(function(dir) {
         var dirPath = root + '/' + dir;
@@ -145,6 +139,12 @@ function parse(argv) {
   dIndex = argv.indexOf('-D');
   if(dIndex == -1) { dIndex = argv.indexOf('--dirs'); }
   if(dIndex != -1) { dirs = argv[dIndex +1]; }
+
+  if (dirs) {
+      dirs = dirs.split(':');
+  } else {
+      dirs = [dir];
+  }
   
   tIndex = argv.indexOf('-t');
   if(tIndex == -1) { tIndex = argv.indexOf('--test'); }
@@ -157,7 +157,6 @@ function parse(argv) {
   
   return {
     intro: intro,
-    dir: dir,
     dirs: dirs,
     test: test
   }
