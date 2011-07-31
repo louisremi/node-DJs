@@ -91,7 +91,8 @@ function playlist(file, callback) {
     list[file] = true;
 
     // Search dependencies of that file
-    while(match = /(?:^|[^\w-])require *\(\s*['"](\.\/|\.\.|\/)(.*?)['"]\s*\)/g.exec(data)) {
+    var requires = /(?:^|[^\w-])require *\(\s*['"](\.\/|\.\.|\/)(.*?)['"]\s*\)/g;
+    while(match = requires.exec(data)) {
       deps[path.join(match[1] == '/'? '' : directory , (match[1] != "./"? match[1] : '') + match[2] + '.js')] = true;
     }
     deps = Object.keys(deps);
