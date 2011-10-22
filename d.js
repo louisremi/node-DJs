@@ -7,22 +7,22 @@ var sys = require('sys'),
   stdin = process.openStdin(),
   args = parse(process.argv),
   intro = args.intro,
-  dir = args.dir,
-  test = args.test;
-  
+  dirs = args.dirs,
+  tests = args.tests;
+
 // Run the tests in parallel
-if(test) {
-  if(test === true) {
+if(tests) {
+  if(tests === true) {
     fs.stat('test', function(err, stats) {
       if(err || !stats.isDirectory()) {
-        test = 'test.js';
+        tests = ['test.js'];
       } else {
-        test = 'test/test.js';
+        tests = ['test/test.js'];
       }
-      startTest(test);
+      startTest(tests);
     });
   } else {
-    startTest(test);
+    startTest(tests);
   }
 }
   
@@ -50,7 +50,7 @@ playlist(intro, function(err, list) {
       case '\n':
         say("restarting playlist");
         stop(playing, intro);
-        startTest(test);
+        startTest(tests);
         playing = play(intro);
         break;
     }
@@ -111,20 +111,47 @@ function playlist(file, callback) {
         }
       });
     } while(i > 0);
+
+    if (dirs) {
+      var root = process.cwd();
+      dirs.forEach(function(dir) {
+        var dirPath = root + '/' + dir;
+        walkTree(dirPath, function(filePath, stat) {
+          if (stat.isFile() && path.extname(filePath) === '.js') {
+            list[path.normalize(filePath)] = true;
+          }
+        });
+      });
+    }
   });
+
 }
 
 function parse(argv) {
-  var intro, dIndex, dir, tIndex, test;
+  var intro, dIndex, dir, tIndex, tests;
   
   dIndex = argv.indexOf('-d');
   if(dIndex == -1) { dIndex = argv.indexOf('--dir'); }
   if(dIndex != -1) { dir = argv[dIndex +1]; }
-  
+
+  if (dir && dir.indexOf(':') > -1) {
+      dirs = dir.split(':');
+  } else if (dir) {
+      dirs = [dir];
+  }
+
   tIndex = argv.indexOf('-t');
   if(tIndex == -1) { tIndex = argv.indexOf('--test'); }
-  if(tIndex != -1) { test = tIndex +1 == dIndex? true : argv[tIndex +1] || true; }
+  if(tIndex != -1) { tests = tIndex +1 == dIndex? true : argv[tIndex +1] || true; }
   
+  if (tests !== true) {
+      if (tests && tests.indexOf(':') > -1) {
+          tests = tests.split(':');
+      } else if (tests) {
+          tests = [tests];
+      }
+  }
+
   intro = (dIndex == 2 || tIndex == 2)? false : argv[2]; 
   
   // Add potentially missing extension
@@ -132,33 +159,50 @@ function parse(argv) {
   
   return {
     intro: intro,
-    dir: dir,
-    test: test
+    dirs: dirs,
+    tests: tests
   }
 }
 
-function startTest(test) {
-  if(test) {
-    fs.stat(test, function(err, stats) {
-      if(err || !stats.isFile()) {
-        say("Test file not found");
-      } else {
-        // We'll buffer the output, to minimize noise
-        exec("node "+test, function(err, stdout, stderr) {
-          sys.puts("=============== Tests ===============");
-            _print("------------ Exec Errors ------------", err);
-            _print("--------------- stdout --------------", stdout);
-            _print("--------------- stderr --------------", stderr);
-          sys.puts("============= Tests End =============");
-          
-          function _print(header, data) {
-            if(data) {
-              sys.puts(header);
-              sys.print(typeof data == 'string'? data : data.toString('utf8', 0, data.length));
+var walkTree = function(rootPath, fn) {
+  var filenameParts, extension, path, stat;
+  var files = fs.readdirSync(rootPath);
+  files.forEach(function(file) {
+    filenameParts = file.split('.');
+    extension = filenameParts[filenameParts.length - 1];
+    path = rootPath + '/' + file;
+    stat = fs.lstatSync(path);
+    fn(path, stat);
+    if (stat.isDirectory() && !stat.isSymbolicLink()) {
+      walkTree(path, fn);
+    }
+  });
+};
+
+function startTest(tests) {
+  if(tests) {
+    tests.forEach(function(test) {
+      fs.stat(test, function(err, stats) {
+        if(err || !stats.isFile()) {
+          say("Test file not found");
+        } else {
+          // We'll buffer the output, to minimize noise
+          exec("node "+test, function(err, stdout, stderr) {
+            sys.puts("=============== Tests ===============");
+              _print("------------ Exec Errors ------------", err);
+              _print("--------------- stdout --------------", stdout);
+              _print("--------------- stderr --------------", stderr);
+            sys.puts("============= Tests End =============");
+            
+            function _print(header, data) {
+              if(data) {
+                sys.puts(header);
+                sys.print(typeof data == 'string'? data : data.toString('utf8', 0, data.length));
+              }
             }
-          }
-        });
-      }
+          });
+        }
+      });
     });
   }
 }
